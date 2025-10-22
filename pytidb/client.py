@@ -56,6 +56,7 @@ class TiDBClient:
         password: Optional[str] = "",
         database: Optional[str] = "test",
         enable_ssl: Optional[bool] = None,
+        ca_path: Optional[str] = None,
         ensure_db: Optional[bool] = False,
         debug: Optional[bool] = None,
         **kwargs,
@@ -68,6 +69,7 @@ class TiDBClient:
                 password=password,
                 database=database,
                 enable_ssl=enable_ssl,
+                ca_path=ca_path,
             )
             # TODO: When URL is passed in directly, it should be validated.
 
