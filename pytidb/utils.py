@@ -62,10 +62,11 @@ def build_tidb_connection_url(
         database (str, optional): The database name to connect to. Defaults to "test".
         enable_ssl (Optional[bool], optional): Whether to enable SSL for the connection.
             If None (default), SSL is automatically enabled for TiDB Serverless hosts
-            and disabled for other hosts.
+            or when ca_path is provided. Explicitly set to False to disable SSL.
         ca_path (Optional[str], optional): Path to the CA certificate file for SSL connections.
             This is particularly useful for Windows users connecting to TiDB Serverless,
             where a custom CA certificate (e.g., ISRG Root X1) may be required.
+            When provided, SSL will be automatically enabled unless explicitly disabled.
 
     Returns:
         str: A Connection URL string that can be used to connect to a TiDB database.
@@ -73,6 +74,8 @@ def build_tidb_connection_url(
 
     if enable_ssl is None:
         if host and TIDB_SERVERLESS_HOST_PATTERN.match(host):
+            enable_ssl = True
+        elif ca_path:
             enable_ssl = True
         else:
             enable_ssl = None

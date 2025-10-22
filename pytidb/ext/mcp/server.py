@@ -62,6 +62,7 @@ class TiDBConnector:
             self.username = username
             self.password = password
             self.database = database
+        self.ca_path = ca_path
 
     def show_databases(self) -> list[dict]:
         return self.tidb_client.query("SHOW DATABASES").to_list()
@@ -78,6 +79,7 @@ class TiDBConnector:
             username=username or self.username,
             password=password or self.password,
             database=db_name or self.database,
+            ca_path=self.ca_path,
         )
 
     def show_tables(self) -> list[str]:
