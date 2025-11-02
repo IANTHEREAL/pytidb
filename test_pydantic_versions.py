@@ -12,6 +12,20 @@ from pathlib import Path
 # Pydantic versions to test (as specified in the issue)
 PYDANTIC_VERSIONS = ["2.0.3", "2.5.3", "2.10.6", "2.12.3"]
 
+
+def find_project_root():
+    """Find the project root directory by looking for pyproject.toml"""
+    current = Path(__file__).resolve()
+    for parent in [current] + list(current.parents):
+        if (parent / "pyproject.toml").exists():
+            return parent
+    raise FileNotFoundError("Could not find project root (pyproject.toml not found)")
+
+
+def get_python_executable():
+    """Get the Python executable to use, with optional override"""
+    return os.environ.get("PYTIDB_PYTHON", sys.executable)
+
 def run_with_pydantic_version(version: str):
     """Test pytidb with a specific pydantic version"""
     print(f"\n{'='*60}")
@@ -33,8 +47,9 @@ def run_with_pydantic_version(version: str):
 
     # Run compatibility tests
     print("Running compatibility tests...")
+    python_exe = get_python_executable()
     result = subprocess.run([
-        ".venv/bin/python", "test_pydantic_compat.py"
+        python_exe, "test_pydantic_compat.py"
     ], capture_output=True, text=True)
 
     test_success = result.returncode == 0
@@ -44,7 +59,7 @@ def run_with_pydantic_version(version: str):
     # Try to import pytidb core modules
     print("Testing pytidb imports...")
     import_result = subprocess.run([
-        ".venv/bin/python", "-c",
+        python_exe, "-c",
         """
 try:
     from pytidb import TiDBClient, Session, Table
@@ -83,8 +98,10 @@ def main():
     print("PyTiDB Pydantic Compatibility Test Suite")
     print("Testing versions:", ", ".join(PYDANTIC_VERSIONS))
 
-    # Change to the correct directory
-    os.chdir("/home/pan/workspace/pytidb")
+    # Find and change to the project root directory
+    project_root = find_project_root()
+    print(f"Project root: {project_root}")
+    os.chdir(project_root)
 
     results = []
 
@@ -92,7 +109,11 @@ def main():
         result = run_with_pydantic_version(version)
         results.append(result)
 
-        if result["overall_success"]:
+        # Check install success first, then overall success
+        if not result.get("install_success", True):
+            print(f"❌ pydantic=={version}: INSTALL FAILED")
+            print(f"  - Install error: {result.get('error', 'Unknown error')}")
+        elif result.get("overall_success", False):
             print(f"✅ pydantic=={version}: ALL TESTS PASSED")
         else:
             print(f"❌ pydantic=={version}: TESTS FAILED")
@@ -106,7 +127,7 @@ def main():
     print("FINAL SUMMARY")
     print(f"{'='*60}")
 
-    passed = sum(1 for r in results if r["overall_success"])
+    passed = sum(1 for r in results if r.get("install_success", True) and r.get("overall_success", False))
     total = len(results)
 
     print(f"Versions tested: {total}")
@@ -115,19 +136,33 @@ def main():
 
     print("\nDetailed results:")
     for result in results:
-        status = "✅ PASS" if result["overall_success"] else "❌ FAIL"
+        if not result.get("install_success", True):
+            status = "❌ INSTALL FAILED"
+        elif result.get("overall_success", False):
+            status = "✅ PASS"
+        else:
+            status = "❌ FAIL"
+
         print(f"  pydantic=={result['version']}: {status}")
-        if not result["overall_success"]:
+
+        # Show errors for failed installs or failed tests
+        if not result.get("install_success", True):
+            print(f"    Install error: {result.get('error', 'Unknown')[:100]}...")
+        elif not result.get("overall_success", False):
             if not result.get("compatibility_test_success", False):
                 print(f"    Compatibility error: {result.get('compatibility_test_error', 'Unknown')}")
             if not result.get("import_test_success", False):
                 print(f"    Import error: {result.get('import_test_error', 'Unknown')}")
 
+    # Ensure .compat_reports directory exists
+    os.makedirs(".compat_reports", exist_ok=True)
+
     # Save detailed results
-    with open("pydantic_compatibility_results.json", "w") as f:
+    results_file = ".compat_reports/pydantic_compatibility_results.json"
+    with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\nDetailed results saved to: pydantic_compatibility_results.json")
+    print(f"\nDetailed results saved to: {results_file}")
 
     return passed == total
 

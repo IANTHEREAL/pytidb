@@ -13,6 +13,20 @@ from pathlib import Path
 # Pydantic versions to test (as specified in the issue)
 PYDANTIC_VERSIONS = ["2.0.3", "2.5.3", "2.10.6", "2.12.3"]
 
+
+def find_project_root():
+    """Find the project root directory by looking for pyproject.toml"""
+    current = Path(__file__).resolve()
+    for parent in [current] + list(current.parents):
+        if (parent / "pyproject.toml").exists():
+            return parent
+    raise FileNotFoundError("Could not find project root (pyproject.toml not found)")
+
+
+def get_python_executable():
+    """Get the Python executable to use, with optional override"""
+    return os.environ.get("PYTIDB_PYTHON", sys.executable)
+
 def run_with_pydantic_version(version: str):
     """Test pytidb with a specific pydantic version"""
     print(f"\n{'='*60}")
@@ -34,8 +48,9 @@ def run_with_pydantic_version(version: str):
 
     # Run basic compatibility tests
     print("Running basic compatibility tests...")
+    python_exe = get_python_executable()
     basic_result = subprocess.run([
-        ".venv/bin/python", "test_pydantic_compat.py"
+        python_exe, "test_pydantic_compat.py"
     ], capture_output=True, text=True)
 
     basic_success = basic_result.returncode == 0
@@ -45,7 +60,7 @@ def run_with_pydantic_version(version: str):
     # Run comprehensive pytidb import tests
     print("Testing pytidb core imports...")
     import_result = subprocess.run([
-        ".venv/bin/python", "-c",
+        python_exe, "-c",
         """
 # DO NOT suppress warnings globally - we need to detect them!
 try:
@@ -90,7 +105,7 @@ except Exception as e:
     # Test embedding function instantiation (key use case)
     print("Testing embedding function instantiation...")
     embedding_result = subprocess.run([
-        ".venv/bin/python", "-c",
+        python_exe, "-c",
         """
 import warnings
 
@@ -155,7 +170,7 @@ except Exception as e:
     # Test URL functionality
     print("Testing URL functionality...")
     url_result = subprocess.run([
-        ".venv/bin/python", "-c",
+        python_exe, "-c",
         """
 try:
     from pytidb.utils import TiDBConnectionURL, build_tidb_connection_url
@@ -193,7 +208,7 @@ except Exception as e:
     # Run the dedicated pydantic compatibility tests
     print("Running dedicated pydantic compatibility test suite...")
     pytest_result = subprocess.run([
-        ".venv/bin/python", "-m", "pytest", "tests/test_pydantic_compatibility.py", "-v", "--tb=short"
+        python_exe, "-m", "pytest", "tests/test_pydantic_compatibility.py", "-v", "--tb=short"
     ], capture_output=True, text=True)
 
     pytest_success = pytest_result.returncode == 0
@@ -231,8 +246,10 @@ def main():
     print("Testing versions:", ", ".join(PYDANTIC_VERSIONS))
     print("Issue: https://github.com/pingcap/pytidb/issues/178")
 
-    # Change to the correct directory
-    os.chdir("/home/pan/workspace/pytidb")
+    # Find and change to the project root directory
+    project_root = find_project_root()
+    print(f"Project root: {project_root}")
+    os.chdir(project_root)
 
     results = []
     start_time = time.time()
@@ -241,7 +258,11 @@ def main():
         result = run_with_pydantic_version(version)
         results.append(result)
 
-        if result["overall_success"]:
+        # Check install success first, then overall success
+        if not result.get("install_success", True):
+            print(f"❌ pydantic=={version}: INSTALL FAILED")
+            print(f"  - Install error: {result.get('error', 'Unknown error')}")
+        elif result.get("overall_success", False):
             print(f"✅ pydantic=={version}: ALL TESTS PASSED")
         else:
             print(f"❌ pydantic=={version}: TESTS FAILED")
@@ -263,7 +284,7 @@ def main():
     print("FINAL SUMMARY")
     print(f"{'='*60}")
 
-    passed = sum(1 for r in results if r["overall_success"])
+    passed = sum(1 for r in results if r.get("install_success", True) and r.get("overall_success", False))
     total = len(results)
     elapsed_time = time.time() - start_time
 
@@ -274,11 +295,20 @@ def main():
 
     print("\nDetailed results:")
     for result in results:
-        status = "✅ PASS" if result["overall_success"] else "❌ FAIL"
+        if not result.get("install_success", True):
+            status = "❌ INSTALL FAILED"
+        elif result.get("overall_success", False):
+            status = "✅ PASS"
+        else:
+            status = "❌ FAIL"
+
         version = result["version"]
         print(f"  pydantic=={version}: {status}")
 
-        if not result["overall_success"]:
+        # Show errors for failed installs or failed tests
+        if not result.get("install_success", True):
+            print(f"    Install error: {result.get('error', 'Unknown error')[:100]}...")
+        elif not result.get("overall_success", False):
             # Show first error for debugging
             if not result.get("import_test_success", False) and result.get("import_test_error"):
                 error_lines = result["import_test_error"].split('\n')
@@ -290,15 +320,18 @@ def main():
                 error_lines = result["pytest_error"].split('\n')
                 print(f"    Pytest error: {error_lines[-2] if len(error_lines) > 1 else error_lines[0]}")
 
+    # Ensure .compat_reports directory exists
+    os.makedirs(".compat_reports", exist_ok=True)
+
     # Save detailed results
-    results_file = "pydantic_compatibility_results_comprehensive.json"
+    results_file = ".compat_reports/pydantic_compatibility_results_comprehensive.json"
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
 
     print(f"\nDetailed results saved to: {results_file}")
 
     # Create summary report
-    summary_file = "PYDANTIC_COMPATIBILITY_REPORT.md"
+    summary_file = ".compat_reports/PYDANTIC_COMPATIBILITY_REPORT.md"
     with open(summary_file, "w") as f:
         f.write("# PyTiDB Pydantic Compatibility Report\n\n")
         f.write(f"**Issue:** https://github.com/pingcap/pytidb/issues/178\n\n")
@@ -308,7 +341,12 @@ def main():
 
         f.write("## Test Results\n\n")
         for result in results:
-            status = "✅ PASS" if result["overall_success"] else "❌ FAIL"
+            if not result.get("install_success", True):
+                status = "❌ INSTALL FAILED"
+            elif result.get("overall_success", False):
+                status = "✅ PASS"
+            else:
+                status = "❌ FAIL"
             f.write(f"- **pydantic {result['version']}**: {status}\n")
 
         f.write("\n## Test Coverage\n\n")
@@ -325,8 +363,12 @@ def main():
         else:
             f.write("## ❌ Issues Found\n\n")
             for result in results:
-                if not result["overall_success"]:
-                    f.write(f"### pydantic {result['version']}\n\n")
+                # Handle install failures and test failures separately
+                if not result.get("install_success", True):
+                    f.write(f"### pydantic {result['version']} - Install Failed\n\n")
+                    f.write(f"**Error:** {result.get('error', 'Unknown install error')}\n\n")
+                elif not result.get("overall_success", False):
+                    f.write(f"### pydantic {result['version']} - Tests Failed\n\n")
                     # Add error details...
 
     print(f"Summary report saved to: {summary_file}")
