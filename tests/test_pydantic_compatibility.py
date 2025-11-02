@@ -10,8 +10,7 @@ import pytest
 from typing import Optional, Any, Dict, List
 from unittest.mock import Mock
 
-# Suppress pydantic warnings during tests
-warnings.filterwarnings('ignore', category=UserWarning, message='.*Field.*model_.*')
+# DO NOT suppress pydantic warnings globally - we need to detect them to ensure our fix works!
 
 
 class TestPydanticBasicCompatibility:
@@ -127,19 +126,22 @@ class TestPyTiDBPydanticIntegration:
         """Test BaseEmbeddingFunction model compatibility"""
         from pytidb.embeddings.base import BaseEmbeddingFunction
 
-        class TestEmbedding(BaseEmbeddingFunction):
-            def get_query_embedding(self, query, source_type="text", **kwargs):
-                return [0.1, 0.2, 0.3]
-
-            def get_source_embedding(self, source, source_type="text", **kwargs):
-                return [0.1, 0.2, 0.3]
-
-            def get_source_embeddings(self, sources, source_type="text", **kwargs):
-                return [[0.1, 0.2, 0.3] for _ in sources]
-
-        # Test instantiation without warnings
+        # Test class definition and instantiation without warnings
+        # NOTE: The warning occurs during class definition, not instantiation
         with warnings.catch_warnings(record=True) as w:
+            warnings.resetwarnings()  # Clear any existing filters
             warnings.simplefilter("always")
+
+            class TestEmbedding(BaseEmbeddingFunction):
+                def get_query_embedding(self, query, source_type="text", **kwargs):
+                    return [0.1, 0.2, 0.3]
+
+                def get_source_embedding(self, source, source_type="text", **kwargs):
+                    return [0.1, 0.2, 0.3]
+
+                def get_source_embeddings(self, sources, source_type="text", **kwargs):
+                    return [[0.1, 0.2, 0.3] for _ in sources]
+
             embed_fn = TestEmbedding(provider="test", model_name="test-model")
 
             # Check that no protected namespace warnings were raised

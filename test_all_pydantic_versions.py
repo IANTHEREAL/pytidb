@@ -47,9 +47,7 @@ def run_with_pydantic_version(version: str):
     import_result = subprocess.run([
         ".venv/bin/python", "-c",
         """
-import warnings
-warnings.filterwarnings('ignore', category=UserWarning, message='.*Field.*model_.*')
-
+# DO NOT suppress warnings globally - we need to detect them!
 try:
     # Core imports
     from pytidb import TiDBClient, Session, Table
@@ -95,31 +93,34 @@ except Exception as e:
         ".venv/bin/python", "-c",
         """
 import warnings
-warnings.filterwarnings('ignore', category=UserWarning, message='.*Field.*model_.*')
 
 try:
     from pytidb.embeddings.base import BaseEmbeddingFunction
 
-    class TestEmbedding(BaseEmbeddingFunction):
-        def get_query_embedding(self, query, source_type="text", **kwargs):
-            return [0.1, 0.2, 0.3]
-
-        def get_source_embedding(self, source, source_type="text", **kwargs):
-            return [0.1, 0.2, 0.3]
-
-        def get_source_embeddings(self, sources, source_type="text", **kwargs):
-            return [[0.1, 0.2, 0.3] for _ in sources]
-
-    # Test instantiation with model_name (the problematic field)
+    # Test class definition and instantiation (warnings occur during class definition)
     with warnings.catch_warnings(record=True) as w:
+        warnings.resetwarnings()  # Clear any existing filters
         warnings.simplefilter("always")
+
+        class TestEmbedding(BaseEmbeddingFunction):
+            def get_query_embedding(self, query, source_type="text", **kwargs):
+                return [0.1, 0.2, 0.3]
+
+            def get_source_embedding(self, source, source_type="text", **kwargs):
+                return [0.1, 0.2, 0.3]
+
+            def get_source_embeddings(self, sources, source_type="text", **kwargs):
+                return [[0.1, 0.2, 0.3] for _ in sources]
+
         embed_fn = TestEmbedding(provider="test", model_name="test-model", dimensions=768)
 
         # Check for protected namespace warnings
         pydantic_warnings = [warning for warning in w
                            if "protected namespace" in str(warning.message)]
         if pydantic_warnings:
-            print(f"WARNING: Found pydantic warnings: {[str(w.message) for w in pydantic_warnings]}")
+            print(f"ERROR: Found pydantic warnings: {[str(w.message) for w in pydantic_warnings]}")
+            print("The fix is not working correctly!")
+            exit(1)
         else:
             print("✅ No pydantic warnings found")
 

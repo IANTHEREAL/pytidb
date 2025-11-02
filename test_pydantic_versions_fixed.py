@@ -47,7 +47,7 @@ def run_with_pydantic_version(version: str):
         ".venv/bin/python", "-c",
         """
 import warnings
-warnings.filterwarnings('ignore', category=UserWarning, message='.*Field.*model_.*')
+# DO NOT suppress warnings globally - we need to detect them!
 
 try:
     from pytidb import TiDBClient, Session, Table
@@ -76,7 +76,7 @@ except Exception as e:
         ".venv/bin/python", "-c",
         """
 import warnings
-warnings.filterwarnings('ignore', category=UserWarning, message='.*Field.*model_.*')
+# DO NOT suppress warnings globally - we need to detect them!
 
 try:
     from pytidb.embeddings.base import BaseEmbeddingFunction
