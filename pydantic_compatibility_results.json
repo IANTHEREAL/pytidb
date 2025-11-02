@@ -1,0 +1,46 @@
+[
+  {
+    "version": "2.0.3",
+    "install_success": true,
+    "compatibility_test_success": true,
+    "compatibility_test_output": "Testing pydantic version: 2.0.3\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
+    "compatibility_test_error": "",
+    "import_test_success": false,
+    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "import_test_error": "/home/pan/workspace/pytidb/.venv/lib/python3.12/site-packages/pydantic/_internal/_fields.py:126: UserWarning: Field \"model_name\" has conflict with protected namespace \"model_\".\n\nYou may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.\n  warnings.warn(\nTraceback (most recent call last):\n  File \"<string>\", line 5, in <module>\nImportError: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "overall_success": false
+  },
+  {
+    "version": "2.5.3",
+    "install_success": true,
+    "compatibility_test_success": true,
+    "compatibility_test_output": "Testing pydantic version: 2.5.3\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
+    "compatibility_test_error": "",
+    "import_test_success": false,
+    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "import_test_error": "/home/pan/workspace/pytidb/.venv/lib/python3.12/site-packages/pydantic/_internal/_fields.py:149: UserWarning: Field \"model_name\" has conflict with protected namespace \"model_\".\n\nYou may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.\n  warnings.warn(\nTraceback (most recent call last):\n  File \"<string>\", line 5, in <module>\nImportError: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "overall_success": false
+  },
+  {
+    "version": "2.10.6",
+    "install_success": true,
+    "compatibility_test_success": true,
+    "compatibility_test_output": "Testing pydantic version: 2.10.6\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
+    "compatibility_test_error": "",
+    "import_test_success": false,
+    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "import_test_error": "Traceback (most recent call last):\n  File \"<string>\", line 5, in <module>\nImportError: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "overall_success": false
+  },
+  {
+    "version": "2.12.3",
+    "install_success": true,
+    "compatibility_test_success": true,
+    "compatibility_test_output": "Testing pydantic version: 2.12.3\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
+    "compatibility_test_error": "",
+    "import_test_success": false,
+    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "import_test_error": "Traceback (most recent call last):\n  File \"<string>\", line 5, in <module>\nImportError: cannot import name 'VectorSearch' from 'pytidb.search' (/home/pan/workspace/pytidb/pytidb/search.py)\n",
+    "overall_success": false
+  }
+]
