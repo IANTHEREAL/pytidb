@@ -38,6 +38,7 @@ class TiDBConnector:
         username: Optional[str] = None,
         password: Optional[str] = None,
         database: Optional[str] = None,
+        ca_path: Optional[str] = None,
     ):
         self.tidb_client = TiDBClient.connect(
             url=database_url,
@@ -46,6 +47,7 @@ class TiDBConnector:
             username=username,
             password=password,
             database=database,
+            ca_path=ca_path,
         )
         if database_url:
             uri = MySQLDsn(database_url)
@@ -54,12 +56,18 @@ class TiDBConnector:
             self.username = uri.username
             self.password = uri.password
             self.database = uri.path.lstrip("/")
+            # Store ca_path for use in switch_database, prioritizing explicit ca_path
+            # over ssl_ca from URL, but preserving URL-based CA if no explicit ca_path
+            from pytidb.utils import extract_ca_path_from_url
+            url_ca_path = extract_ca_path_from_url(database_url)
+            self.ca_path = ca_path or url_ca_path
         else:
             self.host = host
             self.port = port
             self.username = username
             self.password = password
             self.database = database
+            self.ca_path = ca_path  # Store ca_path for use in switch_database
 
     def show_databases(self) -> list[dict]:
         return self.tidb_client.query("SHOW DATABASES").to_list()
@@ -76,6 +84,7 @@ class TiDBConnector:
             username=username or self.username,
             password=password or self.password,
             database=db_name or self.database,
+            ca_path=self.ca_path,  # Preserve CA path configuration
         )
 
     def show_tables(self) -> list[str]:
@@ -160,6 +169,7 @@ async def app_lifespan(app: FastMCP) -> AsyncIterator[AppContext]:
             username=os.getenv("TIDB_USERNAME", "root"),
             password=os.getenv("TIDB_PASSWORD", ""),
             database=os.getenv("TIDB_DATABASE", "test"),
+            ca_path=os.getenv("TIDB_CA_PATH", None),
         )
         log.info(f"Connected to TiDB: {tidb.host}:{tidb.port}/{tidb.database}")
         yield AppContext(tidb=tidb)
