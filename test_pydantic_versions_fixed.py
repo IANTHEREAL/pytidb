@@ -55,7 +55,8 @@ try:
     from pytidb.search import Search, SearchResult
     from pytidb.schema import VectorField
     from pytidb.utils import TiDBConnectionURL
-    from pytidb.result import SearchResult as ResultSearchResult
+    # Note: SearchResult is in pytidb.search, not pytidb.result
+    from pytidb.result import QueryResult, Result, SQLExecuteResult
     print("SUCCESS: All core pytidb modules imported successfully")
 except Exception as e:
     print(f"ERROR: Failed to import pytidb modules: {e}")

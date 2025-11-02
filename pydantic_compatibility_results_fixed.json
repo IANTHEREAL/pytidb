@@ -5,13 +5,13 @@
     "compatibility_test_success": true,
     "compatibility_test_output": "Testing pydantic version: 2.0.3\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
     "compatibility_test_error": "",
-    "import_test_success": false,
-    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
-    "import_test_error": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\nImportError: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
+    "import_test_success": true,
+    "import_test_output": "SUCCESS: All core pytidb modules imported successfully\n",
+    "import_test_error": "",
     "model_test_success": true,
     "model_test_output": "SUCCESS: Model instantiation works\nModel dump: {'provider': 'test', 'model_name': 'test-model', 'dimensions': None, 'use_server': False, 'additional_json_options': None}\n",
     "model_test_error": "",
-    "overall_success": false
+    "overall_success": true
   },
   {
     "version": "2.5.3",
@@ -19,13 +19,13 @@
     "compatibility_test_success": true,
     "compatibility_test_output": "Testing pydantic version: 2.5.3\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
     "compatibility_test_error": "",
-    "import_test_success": false,
-    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
-    "import_test_error": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\nImportError: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
+    "import_test_success": true,
+    "import_test_output": "SUCCESS: All core pytidb modules imported successfully\n",
+    "import_test_error": "",
     "model_test_success": true,
     "model_test_output": "SUCCESS: Model instantiation works\nModel dump: {'provider': 'test', 'model_name': 'test-model', 'dimensions': None, 'use_server': False, 'additional_json_options': None}\n",
     "model_test_error": "",
-    "overall_success": false
+    "overall_success": true
   },
   {
     "version": "2.10.6",
@@ -33,13 +33,13 @@
     "compatibility_test_success": true,
     "compatibility_test_output": "Testing pydantic version: 2.10.6\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
     "compatibility_test_error": "",
-    "import_test_success": false,
-    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
-    "import_test_error": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\nImportError: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
+    "import_test_success": true,
+    "import_test_output": "SUCCESS: All core pytidb modules imported successfully\n",
+    "import_test_error": "",
     "model_test_success": true,
     "model_test_output": "SUCCESS: Model instantiation works\nModel dump: {'provider': 'test', 'model_name': 'test-model', 'dimensions': None, 'use_server': False, 'additional_json_options': None}\n",
     "model_test_error": "",
-    "overall_success": false
+    "overall_success": true
   },
   {
     "version": "2.12.3",
@@ -47,12 +47,12 @@
     "compatibility_test_success": true,
     "compatibility_test_output": "Testing pydantic version: 2.12.3\n==================================================\nRunning Basic Imports...\n  \u2705 PASSED\n\nRunning BaseModel Functionality...\n  \u2705 PASSED\n\nRunning URL Constraints...\n  \u2705 PASSED\n\nRunning PrivateAttr...\n  \u2705 PASSED\n\nSUMMARY:\n==============================\nTests passed: 4/4\n",
     "compatibility_test_error": "",
-    "import_test_success": false,
-    "import_test_output": "ERROR: Failed to import pytidb modules: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
-    "import_test_error": "Traceback (most recent call last):\n  File \"<string>\", line 11, in <module>\nImportError: cannot import name 'SearchResult' from 'pytidb.result' (/home/pan/workspace/pytidb/pytidb/result.py)\n",
+    "import_test_success": true,
+    "import_test_output": "SUCCESS: All core pytidb modules imported successfully\n",
+    "import_test_error": "",
     "model_test_success": true,
     "model_test_output": "SUCCESS: Model instantiation works\nModel dump: {'provider': 'test', 'model_name': 'test-model', 'dimensions': None, 'use_server': False, 'additional_json_options': None}\n",
     "model_test_error": "",
-    "overall_success": false
+    "overall_success": true
   }
 ]

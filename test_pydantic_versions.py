@@ -49,7 +49,7 @@ def run_with_pydantic_version(version: str):
 try:
     from pytidb import TiDBClient, Session, Table
     from pytidb.embeddings import EmbeddingFunction
-    from pytidb.search import VectorSearch, FullTextSearch, HybridSearch
+    from pytidb.search import Search, SearchResult
     from pytidb.schema import VectorField
     from pytidb.utils import TiDBConnectionURL
     print("SUCCESS: All core pytidb modules imported successfully")

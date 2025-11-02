@@ -2,7 +2,7 @@
 
 **Issue:** https://github.com/pingcap/pytidb/issues/178
 
-**Test Date:** 2025-11-02 04:42:35
+**Test Date:** 2025-11-02 05:01:49
 
 **Versions Tested:** 2.0.3, 2.5.3, 2.10.6, 2.12.3
 
