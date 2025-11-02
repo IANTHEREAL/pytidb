@@ -48,6 +48,7 @@ def build_tidb_connection_url(
     password: str = "",
     database: str = "test",
     enable_ssl: Optional[bool] = None,
+    ca_path: Optional[str] = None,
 ) -> str:
     """
     Build a TiDB Connection URL string for database connection.
@@ -61,7 +62,9 @@ def build_tidb_connection_url(
         database (str, optional): The database name to connect to. Defaults to "test".
         enable_ssl (Optional[bool], optional): Whether to enable SSL for the connection.
             If None (default), SSL is automatically enabled for TiDB Serverless hosts
-            and disabled for other hosts.
+            and also enabled when ca_path is provided. Disabled for other hosts.
+        ca_path (Optional[str], optional): Path to CA certificate file for SSL connections.
+            If provided, automatically enables SSL and adds ssl_ca parameter to connection.
 
     Returns:
         str: A Connection URL string that can be used to connect to a TiDB database.
@@ -70,8 +73,19 @@ def build_tidb_connection_url(
     if enable_ssl is None:
         if host and TIDB_SERVERLESS_HOST_PATTERN.match(host):
             enable_ssl = True
+        elif ca_path:
+            # P0 FIX: Treat provided ca_path as signal to enable SSL
+            enable_ssl = True
         else:
             enable_ssl = None
+
+    # Build SSL query parameters if SSL is enabled
+    query = None
+    if enable_ssl:
+        ssl_params = ["ssl_verify_cert=true", "ssl_verify_identity=true"]
+        if ca_path:
+            ssl_params.append(f"ssl_ca={quote(ca_path)}")
+        query = "&".join(ssl_params)
 
     return str(
         TiDBConnectionURL.build(
@@ -83,9 +97,7 @@ def build_tidb_connection_url(
             # https://github.com/pydantic/pydantic/issues/8061
             password=quote(password) if password else None,
             path=database,
-            query=(
-                "ssl_verify_cert=true&ssl_verify_identity=true" if enable_ssl else None
-            ),
+            query=query,
         )
     )
 
@@ -161,3 +173,60 @@ def get_index_type(index: Index) -> str:
         return ""
     mysql_prefix = dialect_kwargs.get("mysql_prefix", "")
     return mysql_prefix.lower() if mysql_prefix else ""
+
+
+def merge_ca_path_into_url(database_url: str, ca_path: Optional[str]) -> str:
+    """
+    Merge CA certificate path into a database URL, overriding any existing ssl_ca parameter.
+
+    Args:
+        database_url (str): The database connection URL
+        ca_path (Optional[str]): Path to CA certificate file
+
+    Returns:
+        str: Modified URL with ssl_ca parameter if ca_path was provided,
+             with explicit ca_path overriding any existing ssl_ca in the URL
+    """
+    if not ca_path:
+        return database_url
+
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+    parsed = urlparse(database_url)
+    query_params = parse_qs(parsed.query)
+
+    # Override ssl_ca parameter (or add if not present)
+    # Explicit ca_path takes precedence over URL-embedded ssl_ca
+    query_params['ssl_ca'] = [ca_path]
+    new_query = urlencode(query_params, doseq=True)
+
+    return urlunparse((
+        parsed.scheme, parsed.netloc, parsed.path,
+        parsed.params, new_query, parsed.fragment
+    ))
+
+
+def extract_ca_path_from_url(database_url: str) -> Optional[str]:
+    """
+    Extract CA certificate path from a database URL.
+
+    Args:
+        database_url (str): The database connection URL
+
+    Returns:
+        Optional[str]: CA certificate path if present in URL, None otherwise
+    """
+    if not database_url:
+        return None
+
+    from urllib.parse import urlparse, parse_qs, unquote
+
+    parsed = urlparse(database_url)
+    query_params = parse_qs(parsed.query)
+
+    # Extract ssl_ca parameter and decode it
+    ssl_ca_list = query_params.get('ssl_ca', [])
+    if ssl_ca_list:
+        return unquote(ssl_ca_list[0])
+
+    return None
